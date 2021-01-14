@@ -4,7 +4,7 @@ Kaggle diary for Santa 2020 - The Candy Cane Contest
 このリポジトリはSantaコンペ2020のKaggle日記です。
 
 ## timeline
-1/14　joined
+1/14　joined<br>
 2/2   deadline
 
 ### 1/14
