@@ -31,7 +31,7 @@ Kaggle diary for Santa 2020 - The Candy Cane Contest
 
 銅メダル、できれば銀メダル
 ### 1/14
-Lindadaさんの公開カーネル：pull_vegas_slot_machines add weaken rate continue5　をそのまま提出。<br>
+Lindadaさんの公開カーネル：pull_vegas_slot_machines add weaken rate continue5　をそのまま提出。**1st commit**<br>
 https://www.kaggle.com/a763337092/pull-vegas-slot-machines-add-weaken-rate-continue5<br>
  →結果、レート1000、順位200位ぐらいに落ち着いた。
 同カーネルの内容を解読した。
@@ -80,16 +80,21 @@ bandint dict={  0: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'wi
 というような形。辞書の中に辞書が入っている
 ### 1/15
 この時点で、閾値は
+
 |金|1250|
+|:--|:--|:--|
 |銀|1150|
 |銅|1100|
+
 となっている。明らかに運ではないだろう。
 
-hansung.devさんのカーネルhttps://www.kaggle.com/hansungdev/santa-2020-beginner-w-a-simple-bandit
+hansung.devさんのカーネルを使って情報を集めたhttps://www.kaggle.com/hansungdev/santa-2020-beginner-w-a-simple-bandit
 
 #### わかったこと
+
 >未知の報酬活動は0.97の割合で減少する。
 見落としていた。
+
 >上記の最適化問題は、古典的な多腕バンディット（MAB）問題です。強化学習の第一段階でよく説明されているので、以下に抜粋してみました。
 >
 >強化学習の最も単純な形は、n本の手（＝腕）を持つバンディット、つまり多腕バンディットです。バンディットをn個のハンドルを持つスロットマシンと考えるのは簡単です。
@@ -97,8 +102,47 @@ hansung.devさんのカーネルhttps://www.kaggle.com/hansungdev/santa-2020-beg
 >
 >n個のスロットマシンが強化学習に最初に降りてくるときの良い出発点である理由は、時間の依存性や状態の依存性を心配する必要がないからです。n個の手を持つスロットマシンで考えな>ければならないのは、どの行動にどのような報酬が関連しているのか、そして最善の行動を選択するようにすることだけです。
 
+>Naive(またはRamdom)探索 : greedyポリシーにノイズを追加 (例: Epsilon-greedy, SoftMax)
+>楽観的な初期化：そうでないと証明されるまで最良のものと仮定する
+>不確実性に直面したときの楽観主義 . 不確実な値を持つ行動を好む（例：UCB
+>確率マッチング : ベストである確率に応じてアクションを選択する (例: トンプソンサンプリング)
+>情報状態検索：情報の価値を取り入れたルックヘッド検索
+
 MAB問題について知る必要がありそうだ。
 
 幸いQiitaに記事があったので、読んでみることにしよう。
 
 強化学習入門：多腕バンディット問題：https://qiita.com/tsugar/items/b809f8d6399cc988aa69
+
+kernelもqiita記事も、1-εで今までで一番スコアが良かったものを選び、εでランダム探索を行うという内容である。しかし、この手法はそれほど強くないようである。
+
+今回のコンペで厄介な点は、同じ自動販売機を選び続けたら当たりの確率が小さくなることと、相手の情報の一部を使えるという点だろうか???うーん
+
+####　やったこと
+とりあえずmath.pow(0.97,〜)の部分をmath.pow(0.96,〜)にしてみた、意味はよくわかっていない。**3rd commit**
+1st commitと比較→前のほうが強そうだった
+とりあえず提出→スコア:よわそう
+やけになって、math.pow(0.97,〜)の部分をmath.pow(0.98,〜)にしてみた、まさに運ゲー**4th commit**
+1st commitと比較→よくわからない
+とりあえず提出→スコア:そこそこつよそう
+
+```
+def multi_armed_probabilities(observation, configuration):
+    (省略)
+        if last_reward > 0:
+            my_pull = my_last_action
+        else:
+            if observation['step'] >= 4:
+                if (my_action_list[-1] == my_action_list[-2]) and (my_action_list[-1] == my_action_list[-3]):
+                    if random.random() < 0.5:
+                        my_pull = my_action_list[-1]
+                    else:
+                        my_pull = get_next_bandit()
+                else:
+                    my_pull = get_next_bandit()
+            else:
+                my_pull = get_next_bandit()
+
+    return my_pull
+```
+どうやら、上で定義したget_next_bandit()と、my_last_action(前の行動)のどちらかを選択するようである。
