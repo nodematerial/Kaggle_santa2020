@@ -83,7 +83,7 @@ bandint dict={  0: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'wi
 この時点で、閾値は
 
 | 金 | 1250 |
-|----|----|----|
+|----|----|
 |銀|1150|
 |銅|1100|
 
@@ -229,8 +229,8 @@ math.powの意味だが、指数部部分は(bandit_dict[bnd]['win'] + bandit_di
     / (bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp']) \
     * math.pow(0.965, bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp'])
 ```
-<img src="https://latex.codecogs.com/gif.latex?\int_a^bf(x)dx" />
+<img src="https://latex.codecogs.com/gif.latex?\bg_white&space;a&plus;b&plus;1=2" />
 #### 決定アルゴリズム
 ```
-
+aaa
 ```
