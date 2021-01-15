@@ -1,4 +1,5 @@
 # Santa2020competition
+<img src="figure/titlefigure.png">
 Kaggle diary for Santa 2020 - The Candy Cane Contest
 
 このリポジトリはSantaコンペ2020のKaggle日記です。
@@ -17,13 +18,14 @@ Kaggle diary for Santa 2020 - The Candy Cane Contest
 らしい。相手の情報は限られている。
 >エージェントは、自分の合計報酬、前のターン(lastActions)に両プレイヤーが引いた盗賊、
 >競争の現在のステップ、残りのOverageTimeを含むオブザベーションを受け取る。
+
 らしい、
 
 
 
 ## timeline
 1/14　joined<br>
-2/2   deadline
+2/2　　deadline
 
 ## 目標
 金　上位11
@@ -32,6 +34,7 @@ Kaggle diary for Santa 2020 - The Candy Cane Contest
 
 銅メダル、できれば銀メダル
 ### 1/14
+***
 Lindadaさんの公開カーネル：pull_vegas_slot_machines add weaken rate continue5　をそのまま提出。**1st commit**<br>
 https://www.kaggle.com/a763337092/pull-vegas-slot-machines-add-weaken-rate-continue5<br>
  →結果、レート1030、順位200位ぐらいに落ち着いた。
@@ -80,6 +83,7 @@ bandint dict={  0: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'wi
 ```
 というような形。辞書の中に辞書が入っている
 ### 1/15
+***
 この時点で、閾値は
 
 | 金 | 1250 |
@@ -230,9 +234,25 @@ math.powの意味だが、指数部部分は(bandit_dict[bnd]['win'] + bandit_di
     * math.pow(0.965, bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp'])
 ```
 <!-- \frac{win-loss+opp-f(opp)\times1.5)}{win+loss+opp} \times (0.95\sim 0.97)^{win+loss+opp} -->
-<img src="https://latex.codecogs.com/gif.latex?\bg_white&space;\frac{win-loss&plus;opp-f(opp)\times1.5)}{win&plus;loss&plus;opp}&space;\times&space;(0.95\sim&space;0.97)^{win&plus;loss&plus;opp}" />
+<img src="https://latex.codecogs.com/gif.latex?\bg_white&space;\frac{win-loss&plus;opp-f(opp)\times1.5}{win&plus;loss&plus;opp}&space;\times&space;(0.95\sim&space;0.97)^{win&plus;loss&plus;opp}" />
 <img src="https://latex.codecogs.com/gif.latex?\bg_white&space;opp=0:&space;f(opp)=0&space;\quad&space;opp\neq0:f(opp)=1">
+
+f(opp)の存在意義が少し不明な感じがするが、相手が一回選んですぐ選ぶのをやめたものをよりえらびにくくする意味があるのだろうと推測する。
 #### 決定アルゴリズム
 ```
-
+ if observation['step'] >= 4:
+    if (my_action_list[-1] == my_action_list[-2]) and (my_action_list[-1] == my_action_list[-3]):
+        if random.random() < 0.5:
+            my_pull = my_action_list[-1]#前の3つが同じだったら、50%の確率で同じのに固執し続ける。
+        else:
+            my_pull = get_next_bandit()
+    else:
+        my_pull = get_next_bandit()
+else:
+    my_pull = get_next_bandit()
 ```
+そこまで言及すべきことはないかな?stepが4以下で例外処理をするのは2行目のエラーを防ぐためだろう。
+#### アイデア
+分子のlossを消す。すなわち、ハズレのときのペナルティーは無しにする(別に当たったときに補正かけるだけでいい気がする)
+前の3つが同じだったら、50%の確率で同じのに固執し続ける。というのを、少し変える。
+
