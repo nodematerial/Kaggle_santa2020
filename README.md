@@ -82,8 +82,8 @@ bandint dict={  0: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'wi
 ### 1/15
 この時点で、閾値は
 
-|金|1250|
-|---|---|---|
+| 金 | 1250 |
+|----|----|----|
 |銀|1150|
 |銅|1100|
 
@@ -195,8 +195,8 @@ my_idx = observation['agentIndex']
 
 少し寝たらだいぶ対戦が進んでいた、それぞれのsubの対戦結果は以下の通り(落ち着いてきた)
 
-|名前|係数|スコア|
-|---|---|---|
+| 名前 | 係数 | スコア |
+|----|----|----|
 |1st commit|0.97|1024.5|
 |3rd commit|0.96|1134.6|
 |4th commit|0.98|924.3|
@@ -221,15 +221,15 @@ math.powの意味だが、指数部部分は(bandit_dict[bnd]['win'] + bandit_di
 
 このコンペのジレンマは、ずっと同じものを選び続けていては、確率がどんどん下がってしまう。しかしながら、ランダムに飛び回っていたとしたら、高い確率を持つ自動販売機にとどまる時間が短くなってしまう。いい塩梅を狙わないといけない。
 
-デフォルトカーネルを読み終わった。構造としては`get_next_bandit()`は、**ある評価式**に従って、最も期待できる自動販売機のインデックスを返す。`multi_armed_probabilities(observation, configuration):`は、評価式で利用する、インデックス毎の情報(win:自分の当たり回数,loss:自分のハズレ回数,opp:相手が選んだ回数,my_continue:自分が連続で選んだ回数の合計,op_continue:相手が連続で選んだ回数の合計)を更新する機能と、次のターン自分が引く自動販売機を決定するという機能を持っている。重要なのは太字の評価式の部分と、最後の次のターン自分が引く自動販売機を決定するという部分だろう。これ以外は基本的にいじる必要はないだろう。
+デフォルトカーネルを読み終わった。構造としては`get_next_bandit()`は、**ある評価式**に従って、最も期待できる自動販売機のインデックスを返す。`multi_armed_probabilities(observation, configuration)`は、評価式で利用する、インデックス毎の情報(win:自分の当たり回数,loss:自分のハズレ回数,opp:相手が選んだ回数,my_continue:自分が連続で選んだ回数の合計,op_continue:相手が連続で選んだ回数の合計)を更新する機能と、次のターン自分が引く自動販売機を決定するという機能を持っている。重要なのは太字の評価式の部分と、最後の次のターン自分が引く自動販売機を決定するという部分だろう。これ以外は基本的にいじる必要はないだろう。
 
 #### 評価式
 ```
 (bandit_dict[bnd]['win'] - bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp'] - (bandit_dict[bnd]['opp']>0)*1.5) \
-                 / (bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp']) \
-                * math.pow(0.965, bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp'])
+    / (bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp']) \
+    * math.pow(0.965, bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp'])
 ```
-$$a+b=\frac{a}{b}$$
+<img src="https://latex.codecogs.com/gif.latex?\int_a^bf(x)dx" />
 #### 決定アルゴリズム
 ```
 
