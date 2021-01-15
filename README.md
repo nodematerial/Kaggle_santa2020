@@ -4,6 +4,7 @@ Kaggle diary for Santa 2020 - The Candy Cane Contest
 このリポジトリはSantaコンペ2020のKaggle日記です。
 
 ## コンペ情報
+強化学習っぽい、内容はそこまで難しくはないかな。
 
 >この大会は、確率ベースの強化学習問題である「マルチアームド・バンディット問題」をモデルにしています。
 >
@@ -33,7 +34,7 @@ Kaggle diary for Santa 2020 - The Candy Cane Contest
 ### 1/14
 Lindadaさんの公開カーネル：pull_vegas_slot_machines add weaken rate continue5　をそのまま提出。**1st commit**<br>
 https://www.kaggle.com/a763337092/pull-vegas-slot-machines-add-weaken-rate-continue5<br>
- →結果、レート1000、順位200位ぐらいに落ち着いた。
+ →結果、レート1030、順位200位ぐらいに落ち着いた。
 同カーネルの内容を解読した。
 #### わかったこと
 ```
@@ -93,7 +94,7 @@ hansung.devさんのカーネルを使って情報を集めたhttps://www.kaggle
 #### わかったこと
 
 >未知の報酬活動は0.97の割合で減少する。
-見落としていた。
+見落としていた。見るからに後半の方でスコアの伸びが小さかったのは、このせいだろう。
 
 >上記の最適化問題は、古典的な多腕バンディット（MAB）問題です。強化学習の第一段階でよく説明されているので、以下に抜粋してみました。
 >
@@ -118,13 +119,16 @@ kernelもqiita記事も、1-εで今までで一番スコアが良かったも�
 
 今回のコンペで厄介な点は、同じ自動販売機を選び続けたら当たりの確率が小さくなることと、相手の情報の一部を使えるという点だろうか???うーん
 
-####　やったこと
-とりあえずmath.pow(0.97,〜)の部分をmath.pow(0.96,〜)にしてみた、意味はよくわかっていない。**3rd commit**
-1st commitと比較→前のほうが強そうだった
-とりあえず提出→スコア:よわそう
-やけになって、math.pow(0.97,〜)の部分をmath.pow(0.98,〜)にしてみた、まさに運ゲー**4th commit**
-1st commitと比較→よくわからない
-とりあえず提出→スコア:そこそこつよそう
+#### やったこと
+とりあえずmath.pow(0.97,〜)の部分をmath.pow(0.96,〜)にしてみた、意味はよくわかっていない。**3rd commit**<br>
+1st commitと比較→前のほうが強そうだった<br>
+とりあえず提出→スコア:強そう<br>
+やけくそになって、math.pow(0.97,〜)の部分をmath.pow(0.98,〜)にしてみた、まさに運ゲー**4th commit**<br>
+1st commitと比較→よくわからない<br>
+とりあえず提出→スコア:弱い<br>
+これらの結果を受けて、math.pow(0.95,〜)にしてみた**5th commit**<br>
+1st commitと比較→強い??<br>
+とりあえず提出→スコア:<br>
 
 ```
 def multi_armed_probabilities(observation, configuration):
@@ -145,4 +149,68 @@ def multi_armed_probabilities(observation, configuration):
 
     return my_pull
 ```
-どうやら、上で定義したget_next_bandit()と、my_last_action(前の行動)のどちらかを選択するようである。
+どうやら、上で定義したget_next_bandit()と、my_last_action(前の行動)のどちらかを選択するようである。<br>
+詳しい中身を解読する。まず、`if last_reward > 0:`であるが、前の引きで当たりだったらもう一回選択するようだ
+
+```
+else:
+        last_reward = observation['reward'] - total_reward
+        total_reward = observation['reward']
+```
+ここでrewardの更新、及び前の試行が当たったか外れたか判定
+```
+my_idx = observation['agentIndex']
+        my_last_action = observation['lastActions'][my_idx]
+        op_last_action = observation['lastActions'][1-my_idx]
+        my_action_list.append(my_last_action)
+        op_action_list.append(op_last_action)
+```
+自分と相手の選択を抜き出す。そしてリストに保存する。
+```
+   if 0 < last_reward:
+            bandit_dict[my_last_action]['win'] = bandit_dict[my_last_action]['win'] +1
+        else:
+            bandit_dict[my_last_action]['loss'] = bandit_dict[my_last_action]['loss'] +1
+```
+ここでは、last rewardの値に応じて、bandit_dictを更新する。
+例えば{...1235:{},1236:{},1237{win:1,loss:0,...},1238:{},1239:{}...}
+が負けると{...1235:{},1236:{},1237{win:1,loss:1,...},1238:{},1239:{}...}になる????
+```
+        if observation['step'] >= 3:
+            if my_action_list[-1] == my_action_list[-2]:
+                bandit_dict[my_last_action]['my_continue'] += 1
+            else:
+                bandit_dict[my_last_action]['my_continue'] = 0
+            if op_action_list[-1] == op_action_list[-2]:
+                bandit_dict[op_last_action]['op_continue'] += 1
+            else:
+                bandit_dict[op_last_action]['op_continue'] = 0
+```
+ここだけ違う???get_next_bandintでop_continueが使われていた。
+ここだけ自分で変えたら面白いかも...
+アイデアとしては、continue_list(辞書だとやりにくいので)を作り、相手が2
+
+少し寝たらだいぶ対戦が進んでいた、それぞれのsubの対戦結果は以下の通り(落ち着いてきた)
+|名前|係数|スコア|
+|-:-|:--|:--|
+|1st commit|0.97|1024.5|
+|3rd commit|0.96|1134.6|
+|4th commit|0.98|924.3|
+|5th commit|0.95|1107.5|
+実験的には0.95~0.97の間にスコアを最大化する点がある？(上に凸の二次関数的な)
+ということで頭悪いけど、間の値でローラー作戦を行う。
+
+math.pow(0.97,〜)→math.pow(0.955,〜) **6th commit**<br>
+math.pow(0.97,〜)→math.pow(0.965,〜) **7th commit**<br>
+
+上手くいくか???
+
+#### 結果
+6th commit
+7th commit
+
+0.96台をローラーする？これで今の所銅メダルは守れそう
+math.powの意味だが、指数部部分は(bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp'])で、今まで引かれた回数を指している。
+つまり、初期の確率と比べて、どれだけ減衰しているかを指している。つまり、底の部分を0.97よりも小さくするということは、減衰のスピードを早める。つまり、多数選択されているものを、より選びにくくなるということである。→これによってスコアがデフォルトカーネルのそれよりも向上しているということは示唆的である。
+
+このコンペのジレンマは、ずっと同じものを選び続けていては、確率がどんどん下がってしまう。しかしながら、ランダムに飛び回っていたとしたら、高い確率を持つ自動販売機にとどまる時間が短くなってしまう。いい塩梅を狙わないといけない。
