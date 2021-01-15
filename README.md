@@ -229,8 +229,10 @@ math.powの意味だが、指数部部分は(bandit_dict[bnd]['win'] + bandit_di
     / (bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp']) \
     * math.pow(0.965, bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp'])
 ```
-<img src="https://latex.codecogs.com/gif.latex?\bg_white&space;a&plus;b&plus;1=2" />
+<!-- \frac{win-loss+opp-f(opp)\times1.5)}{win+loss+opp} \times (0.95\sim 0.97)^{win+loss+opp} -->
+<img src="https://latex.codecogs.com/gif.latex?\bg_white&space;\frac{win-loss&plus;opp-f(opp)\times1.5)}{win&plus;loss&plus;opp}&space;\times&space;(0.95\sim&space;0.97)^{win&plus;loss&plus;opp}" />
+<img src="https://latex.codecogs.com/gif.latex?\bg_white&space;opp=0:&space;f(opp)=0&space;\quad&space;opp\neq0:f(opp)=1">
 #### 決定アルゴリズム
 ```
-aaa
+
 ```
