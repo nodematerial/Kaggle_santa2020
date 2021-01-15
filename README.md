@@ -19,8 +19,7 @@ Kaggle diary for Santa 2020 - The Candy Cane Contest
 >エージェントは、自分の合計報酬、前のターン(lastActions)に両プレイヤーが引いた盗賊、
 >競争の現在のステップ、残りのOverageTimeを含むオブザベーションを受け取る。
 
-らしい、
-
+らしい
 
 
 ## timeline
@@ -75,11 +74,11 @@ Kaggle environmentではもともと次のような辞書が用意されてい�
 remainingOverageTimeは制限時間?あまり重要ではなさそう。rewardはtotalのreward、lastActionsは前の行動
 ```
 辞書:{a:[1,2,3,4,5....],b:[1,2,3,4,5....],c:[1,2,3,4,5....]}　のような形式<br>
-bandint dict={  0: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'win': 1},<br>
-                1: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'win': 1},<br>
-                2: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'win': 1},<br>
-                3: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'win': 1},<br>
-                4: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'win': 1}}<br>
+bandint dict={  0: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'win': 1},
+                1: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'win': 1},
+                2: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'win': 1},
+                3: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'win': 1},
+                4: {'loss': 0, 'my_continue': 0, 'op_continue': 0, 'opp': 0, 'win': 1}}
 ```
 というような形。辞書の中に辞書が入っている
 ### 1/15
@@ -98,6 +97,7 @@ hansung.devさんのカーネルを使って情報を集めたhttps://www.kaggle
 #### わかったこと
 
 >未知の報酬活動は0.97の割合で減少する。
+
 見落としていた。見るからに後半の方でスコアの伸びが小さかったのは、このせいだろう。
 
 >上記の最適化問題は、古典的な多腕バンディット（MAB）問題です。強化学習の第一段階でよく説明されているので、以下に抜粋してみました。
@@ -121,7 +121,7 @@ MAB問題について知る必要がありそうだ。
 
 kernelもqiita記事も、1-εで今までで一番スコアが良かったものを選び、εでランダム探索を行うという内容である。しかし、この手法はそれほど強くないようである。
 
-今回のコンペで厄介な点は、同じ自動販売機を選び続けたら当たりの確率が小さくなることと、相手の情報の一部を使えるという点だろうか???そのため単純な上のアルゴリズムはそのまで機能しないということだろうか、うーん、確率が時間変動するので当然といえば当然であるが
+今回のコンペで厄介な点は、同じ自動販売機を選び続けたら当たりの確率が小さくなることと、相手の情報の一部を使えるという点だろうか???そのため単純な上のアルゴリズムはそのまで機能しないということだろうか、うーん、確率が時間変動するので当然といえば当然であるが...
 
 #### やったこと
 とりあえずmath.pow(0.97,〜)の部分をmath.pow(0.96,〜)にしてみた、意味はよくわかっていない。**3rd commit**<br>
@@ -229,12 +229,12 @@ math.powの意味だが、指数部部分は(bandit_dict[bnd]['win'] + bandit_di
 
 #### 評価式
 ```
-(bandit_dict[bnd]['win'] - bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp'] - (bandit_dict[bnd]['opp']>0)*1.5) \
+(bandit_dict[bnd]['win'] - bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp'] - (bandit_dict[bnd]['opp']>0)*1.5+ bandit_dict[bnd]['op_continue']) \
     / (bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp']) \
     * math.pow(0.965, bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp'])
 ```
 <!-- \frac{win-loss+opp-f(opp)\times1.5)}{win+loss+opp} \times (0.95\sim 0.97)^{win+loss+opp} -->
-<img src="https://latex.codecogs.com/gif.latex?\bg_white&space;\frac{win-loss&plus;opp-f(opp)\times1.5}{win&plus;loss&plus;opp}&space;\times&space;(0.95\sim&space;0.97)^{win&plus;loss&plus;opp}" />
+<img src="https://latex.codecogs.com/gif.latex?\bg_white&space;\frac{win-loss&plus;opp-f(opp)\times1.5&plus;op_continue}{win&plus;loss&plus;opp}&space;\times&space;(0.95\sim&space;0.97)^{win&plus;loss&plus;opp}" />
 <img src="https://latex.codecogs.com/gif.latex?\bg_white&space;opp=0:&space;f(opp)=0&space;\quad&space;opp\neq0:f(opp)=1">
 
 f(opp)の存在意義が少し不明な感じがするが、相手が一回選んですぐ選ぶのをやめたものをよりえらびにくくする意味があるのだろうと推測する。
@@ -254,5 +254,42 @@ else:
 そこまで言及すべきことはないかな?stepが4以下で例外処理をするのは2行目のエラーを防ぐためだろう。
 #### アイデア
 分子のlossを消す。すなわち、ハズレのときのペナルティーは無しにする(別に当たったときに補正かけるだけでいい気がする)
-前の3つが同じだったら、50%の確率で同じのに固執し続ける。というのを、少し変える。
+前の3つが同じだったら、50%の確率で同じのに固執し続ける。というのを、少し変える。例えば80%にしたい。
 
+| 係数 | ハズレペナあり | ハズレペナ無し |
+|----|----|----|
+|0.950|commit5|commit8|
+|0.955|commit6|commit10|
+|0.960|commit3|commit9|
+|0.965|commit7|commit11|
+
+| 係数(ペナあり) | 固執50% | 固執80% |
+|----|----|----|
+|0.950|commit5|commit12|
+|0.955|commit6|commit13|
+|0.960|commit3|commit14|
+|0.965|commit7|commit15|
+
+| 係数(ペナなし) | 固執50% | 固執80% |
+|----|----|----|
+|0.950|commit8|commit16|
+|0.955|commit10|commit17|
+|0.960|commit9|commit18|
+|0.965|commit11|commit19|
+
+1/15,1/16,1,17のsubを使って実験。
+####　結果
+| 名前 | score |
+|----|----|
+|commit8||
+|commit10||
+|commit9||
+|commit11||
+|commit12||
+|commit13||
+|commit14||
+|commit15||
+|commit16||
+|commit17||
+|commit18||
+|commit19||
