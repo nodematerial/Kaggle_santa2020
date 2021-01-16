@@ -234,7 +234,7 @@ math.powの意味だが、指数部部分は(bandit_dict[bnd]['win'] + bandit_di
     * math.pow(0.965, bandit_dict[bnd]['win'] + bandit_dict[bnd]['loss'] + bandit_dict[bnd]['opp'])
 ```
 <!-- \frac{win-loss+opp-f(opp)\times1.5)}{win+loss+opp} \times (0.95\sim 0.97)^{win+loss+opp} -->
-<img src="https://latex.codecogs.com/gif.latex?\bg_white&space;\frac{win-loss&plus;opp-f(opp)\times1.5&plus;op_continue}{win&plus;loss&plus;opp}&space;\times&space;(0.95\sim&space;0.97)^{win&plus;loss&plus;opp}" />
+<img src="https://latex.codecogs.com/gif.latex?\bg_white&space;\frac{win-loss&plus;opp-f(opp)\times1.5&plus;opcontinue}{win&plus;loss&plus;opp}&space;\times&space;(0.95\sim&space;0.97)^{win&plus;loss&plus;opp}" />
 <img src="https://latex.codecogs.com/gif.latex?\bg_white&space;opp=0:&space;f(opp)=0&space;\quad&space;opp\neq0:f(opp)=1">
 
 f(opp)の存在意義が少し不明な感じがするが、相手が一回選んですぐ選ぶのをやめたものをよりえらびにくくする意味があるのだろうと推測する。
@@ -253,7 +253,7 @@ else:
 ```
 そこまで言及すべきことはないかな?stepが4以下で例外処理をするのは2行目のエラーを防ぐためだろう。
 #### アイデア
-分子のlossを消す。すなわち、ハズレのときのペナルティーは無しにする(別に当たったときに補正かけるだけでいい気がする)
+分子のlossを消す。すなわち、ハズレのときのペナルティーは無しにする(別に当たったときに補正かけるだけでいい気がする)→失敗<br>
 前の3つが同じだったら、50%の確率で同じのに固執し続ける。というのを、少し変える。例えば80%にしたい。
 
 | 係数 | ハズレペナあり | ハズレペナ無し |
@@ -262,6 +262,8 @@ else:
 |0.955|commit6|commit10|
 |0.960|commit3|commit9|
 |0.965|commit7|commit11|
+
+完全に失敗、よく考えたら、ペナルティがないと相手の行動次第でずっと同じものと選んでしまうだろう。<br>しかし、これにより、逆にペナルティを強くするという可能性を思いついた。
 
 | 係数(ペナあり) | 固執50% | 固執80% |
 |----|----|----|
@@ -281,15 +283,38 @@ else:
 ####　結果
 | 名前 | score |
 |----|----|
-|commit8||
-|commit10||
-|commit9||
-|commit11||
-|commit12||
-|commit13||
-|commit14||
-|commit15||
-|commit16||
-|commit17||
-|commit18||
-|commit19||
+|commit8|500|
+|commit10|500|
+|commit9|500|
+|commit11|中止|
+|commit12|490|
+|commit13|560|
+|commit14|中止|
+|commit15|中止|
+|commit16|中止|
+|commit17|中止|
+|commit18|中止|
+|commit19|中止|
+
+
+次はlossに対して大きなペナルティをかける方式で実験する。ていうか自分のNotebookの中で対戦できることに今気づいた、遅すぎ。
+
+#### 1/16
+起きたら興味深いことが起こっていた。commit7がcommit3を上回っていた。
+commit12,13をsubしたが、カススコア、どちらの実験もうまく行っていない。そんなもんよ。
+
+commit7がcommit3を上回っていたので、推定最強係数は今の所0.965ということになる。が、0.95もそこそこ強いので、一意の値に確定することはできない？
+>次はlossに対して大きなペナルティをかける方式で実験する。
+
+これを実行する、まずは1.3倍に補正を行う。まず自分の環境内で実験を行ってからsubする。
+
+####　仮説　書き下し
+1.1　序盤強い??
+oppの係数も変えたほうがいい?
+
+| 係数=0.965 | 名前 | 結果 |
+|----|----|----|
+|ペナ=0.8|commit  ||
+|ペナ=0.9|commit  ||
+|ペナ=1.1|commit20|830|
+|ペナ=1.2|commit21|740|
