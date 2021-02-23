@@ -25,30 +25,29 @@ Kaggle diary for Santa 2020 - The Candy Cane Contest
 solo(team mergeしたことない...)
 ## timeline
 1/14　joined<br>
-2/2　 submit deadline
+2/2　 submit deadline<br>
 2/23  close
 ## 目標
-金　上位11
-銀　上位50
+金　上位11<br>
+銀　上位50<br>
 銅　上位100
 
 銅メダル、できれば銀メダル
 
 ## 結果
-80/792 銅メダル
-1st score：1140.6(version79)
-2nd score: 1129.0(version74)
-3rd score: 1125.3(version55)
-4th score: 1120.0(version79)
-5th score: 1114.0(version62)
-6th score: 1111.9(version55)
-以上6つのエージェントが銅メダル圏内
+80/792 銅メダル<br>
+1st score：1140.6(version79)<br>
+2nd score: 1129.0(version74)<br>
+3rd score: 1125.3(version55)<br>
+4th score: 1120.0(version79)<br>
+5th score: 1114.0(version62)<br>
+6th score: 1111.9(version55)<br>
+以上6つのエージェントが銅メダル圏内<br>
 
 大量に実験して、参加してからほぼサブを無駄にしなかったのが良かったと思う。正直pull_vegasの力は大きかったが、他の人もpull_vegasを大量に放出していたので、銅圏に乗るには創意工夫が必要だった。またversion54以前のエージェントは一つも銅圏に乗らなかったことも考えると、粘り強く戦って良かったと思っている。
 
 
 ### 1/14
-ç
 Lindadaさんの公開カーネル：pull_vegas_slot_machines add weaken rate continue5　をそのまま提出。**1st commit**<br>
 https://www.kaggle.com/a763337092/pull-vegas-slot-machines-add-weaken-rate-continue5<br>
  →結果、レート1030、順位200位ぐらいに落ち着いた。
